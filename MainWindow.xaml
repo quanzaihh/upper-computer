@@ -1,0 +1,164 @@
+﻿<Window x:Class="NEW_DEMO.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:local="clr-namespace:NEW_DEMO" xmlns:sys="clr-namespace:System;assembly=System.Runtime" xmlns:sysCollection="clr-namespace:System.Collections;assembly=System.Runtime"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="800" Width="1080">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="20*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Background="#D3D3D3">
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="4*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <!--左侧导航栏-->
+            <Grid Grid.Column="0" Background="CadetBlue">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="串口号:" FontSize="20" FontFamily="宋体" Margin="10,5,10,0" VerticalAlignment="Center" />
+                        <ComboBox Name="Serial_port" Width="100" VerticalAlignment="Stretch" Height="25" Margin="10,5,10,0"></ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="波特率:" FontSize="20" FontFamily="宋体" Margin="10,5,10,0" VerticalAlignment="Center" />
+                        <ComboBox Name="Bondrate" Width="100" VerticalAlignment="Stretch" Height="25" Margin="10,5,10,0"
+                                  ItemsSource="{Binding Source={StaticResource Boundrate}}" SelectedIndex="2"></ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="数据位:" FontSize="20" FontFamily="宋体" Margin="10,5,10,0" VerticalAlignment="Center" />
+                        <ComboBox Name="Databit" Width="100" VerticalAlignment="Stretch" Height="25" Margin="10,5,10,0"
+                                  ItemsSource="{Binding Source={StaticResource Databit}}" SelectedIndex="3"></ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="检验位:" FontSize="20" FontFamily="宋体" Margin="10,5,10,0" VerticalAlignment="Center" />
+                        <ComboBox Name="Checkbit" Width="100" VerticalAlignment="Stretch" Height="25" Margin="10,5,10,0"
+                                  ItemsSource="{Binding Source={StaticResource Checkbit}}" SelectedIndex="0"></ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="停止位:" FontSize="20" FontFamily="宋体" Margin="10,5,10,0" VerticalAlignment="Center" />
+                        <ComboBox Name="Stopbit" Width="100" VerticalAlignment="Stretch" Height="25" Margin="10,5,10,0"
+                                  ItemsSource="{Binding Source={StaticResource Stopbit}}" SelectedIndex="0"></ComboBox>
+                    </StackPanel>
+
+                    <Button x:Name="Connect_serial" Content="连接串口" Width="185" Height="35" Margin="1,5,5,5" FontSize="18" FontFamily="宋体" Background="#D3D3D3" Click="Connect_serial_Click" />
+
+                    <GridSplitter Width="190" Height="1" HorizontalAlignment="Center" Background="#D3D3D3" />
+
+                    <Button x:Name="Channel1" Content="打开LD1" Width="150" Height="35" Margin="1,20,5,5" FontSize="18" FontFamily="宋体" Background="#D3D3D3" Click="Channel_1_Click" />
+                    <Button x:Name="Channel2" Content="打开LD2" Width="150" Height="35" Margin="1,10,5,5" FontSize="18" FontFamily="宋体" Background="#D3D3D3" Click="Channel2_Click" />
+                    <Button x:Name="Channel3" Content="打开LD3" Width="150" Height="35" Margin="1,10,5,5" FontSize="18" FontFamily="宋体" Background="#D3D3D3" Click="Channel3_Click" />
+                    <Button x:Name="Channel4" Content="打开LD4" Width="150" Height="35" Margin="1,10,5,5" FontSize="18" FontFamily="宋体" Background="#D3D3D3" Click="Channel4_Click" />
+                </StackPanel>
+            </Grid>
+
+            <!--右侧实物栏-->
+            <Grid Grid.Column="1" Background="AliceBlue">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"></RowDefinition>
+                    <RowDefinition Height="4*"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"></ColumnDefinition>
+                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <!--4通道电流温度展示-->
+                    <StackPanel Orientation="Vertical" Grid.Column="0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBlock Text="通道" FontSize="18" FontFamily="宋体" Margin="20,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="实际温度" FontSize="18" FontFamily="宋体" Margin="25,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="/" FontSize="18" FontFamily="宋体" Margin="0,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="预设温度" FontSize="18" FontFamily="宋体" Margin="0,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="实际电流" FontSize="18" FontFamily="宋体" Margin="20,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="/" FontSize="18" FontFamily="宋体" Margin="0,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="预设电流" FontSize="18" FontFamily="宋体" Margin="0,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="  设置电压" FontSize="18" FontFamily="宋体" Margin="0,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBlock Text="LD1:" FontSize="18" FontFamily="Times New Roman" Margin="20,10,0,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LD1_acTemp" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="35,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <TextBlock Text="/" FontSize="25" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD1_setTemp" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD1_setTemp_KeyDown"/>
+                            <TextBlock x:Name="LD1_acCurrent" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="30,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <TextBlock Text="/" FontSize="25" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD1_setCurrent" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD1_setCurrent_KeyDown"/>
+                            <TextBlock Text="" FontSize="25" Width="15" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD1_setVol" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD1_setVol_KeyDown"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBlock Text="LD2:" FontSize="18" FontFamily="Times New Roman" Margin="20,10,0,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LD2_acTemp" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="35,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <TextBlock Text="/" FontSize="25" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD2_setTemp" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD2_setTemp_KeyDown"/>
+                            <TextBlock x:Name="LD2_acCurrent" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="30,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <TextBlock Text="/" FontSize="25" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD2_setCurrent" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD2_setCurrent_KeyDown"/>
+                            <TextBlock Text="" FontSize="25" Width="15" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD2_setVol" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD2_setVol_KeyDown"/>                        
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBlock Text="LD3:" FontSize="18" FontFamily="Times New Roman" Margin="20,10,0,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LD3_acTemp" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="35,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <TextBlock Text="/" FontSize="25" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD3_setTemp" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD3_setTemp_KeyDown"/>
+                            <TextBlock x:Name="LD3_acCurrent" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="30,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Text="/" FontSize="25" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD3_setCurrent" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD3_setCurrent_KeyDown"/>
+                            <TextBlock Text="" FontSize="25" Width="15" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD3_setVol" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD3_setVol_KeyDown"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBlock Text="LD4:" FontSize="18" FontFamily="Times New Roman" Margin="20,10,0,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LD4_acTemp" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="35,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <TextBlock Text="/" FontSize="25" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD4_setTemp" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD4_setTemp_KeyDown"/>
+                            <TextBlock x:Name="LD4_acCurrent" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="30,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <TextBlock Text="/" FontSize="25" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD4_setCurrent" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD4_setCurrent_KeyDown"/>
+                            <TextBlock Text="" FontSize="25" Width="15" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="LD4_setVol" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Gray" Width="65" KeyDown="LD4_setVol_KeyDown"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical" Grid.Column="1" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="P/I/D" FontSize="20" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center"/>
+                            <TextBox x:Name="set_P" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" Foreground="Gray" Width="65" KeyDown="set_P_KeyDown"/>
+                            <TextBox x:Name="set_I" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" Foreground="Gray" Width="65" KeyDown="set_I_KeyDown"/>
+                            <TextBox x:Name="set_D" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" Foreground="Gray" Width="65" KeyDown="set_D_KeyDown"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                </Grid>
+
+                <WpfPlot Grid.Row="1" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" Width="auto" Background="AliceBlue"
+                         Name="Main_plot" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
