@@ -12,7 +12,7 @@ namespace NEW_DEMO
     {
         public const int MAX_SHOW_POINT = 1024;
         public readonly int MAX_SHOW_POINTS = MAX_SHOW_POINT;
-        public double time = 0;
+        public double time = -20.48;
         public double temperature = 0;
         public double current = 0;
         public double[] Time = new double[MAX_SHOW_POINT];
@@ -26,20 +26,23 @@ namespace NEW_DEMO
         {
             for (int i = 0; i < MAX_SHOW_POINT; i++)
             {
-                Time[i] = i;
+                Time[i] = i*0.02+time;
                 Temperature[i] = 0;
                 Current[i] = 0;
             }
         }
         public void Updata_data()
         {
+            time += 0.02;
             for (int i = 0; i < MAX_SHOW_POINT - 1; i++)
             {
+                Time[i] = Time[i+1];
                 Temperature[i] = Temperature[i+1];
                 Current[i] = Current[i+1];
             }
             Temperature[MAX_SHOW_POINT - 1] = temperature;
             Current[MAX_SHOW_POINT - 1] = current;
+            Time[MAX_SHOW_POINT - 1] = time;
         }
     }
 

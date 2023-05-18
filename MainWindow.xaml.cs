@@ -30,6 +30,12 @@ namespace NEW_DEMO
     public partial class MainWindow : Window
     {
         public readonly int FRAME_LENGTH = 8;
+        public readonly float TEMP_MIN = 5;
+        public readonly float TEMP_MAX = 40;
+        public readonly float CURRENT_MIN = 1;
+        public readonly float CURRENT_MAX = 180;
+        public readonly double VOL_MIN = -6.5;
+        public readonly double VOL_MAX = 0;
         public Dictionary<int, string> Com_list = new Dictionary<int, string>();
         public string[] Port;
         private FPGA myFPGA = new();
@@ -42,7 +48,8 @@ namespace NEW_DEMO
         private float[] save_data_temp = new float[1024];
         private float[] save_data_da = new float[1024];
         private int point = 0;
-        private int file_cnt = 0;  
+        private int file_cnt = 0;
+        private bool show = false;
 
         public MainWindow()
         {
@@ -63,34 +70,10 @@ namespace NEW_DEMO
 
         public void Search_port()
         {
-            //初始化SerialPort对象
-            try
+            string[] Portname = SerialPort.GetPortNames();
+            for (int i = 0; i < Portname.Length; i++)
             {
-                RegistryKey hklm = Registry.LocalMachine;
-
-                RegistryKey software11 = hklm.OpenSubKey("HARDWARE");
-
-                //打开"HARDWARE"子健
-                RegistryKey software = software11.OpenSubKey("DEVICEMAP");
-
-                RegistryKey sitekey = software.OpenSubKey("SERIALCOMM");
-                //获取当前子健
-                String[] Str2 = sitekey.GetValueNames();
-
-                //获得当前子健下面所有健组成的字符串数组
-                int ValueCount = sitekey.ValueCount;
-                //获得当前子健存在的健值
-                int i;
-                Port = new string[ValueCount];
-                for (i = 0; i < ValueCount; i++)
-                {
-                    Port[i] = (string)sitekey.GetValue(Str2[i]);
-                }
-            }
-            catch (Exception e) { }
-            for (int i = 0; i < Port.Length; i++)
-            {
-                Com_list.Add(i, Port[i]);
+                Com_list.Add(i, Portname[i]);
             }
             Serial_port.ItemsSource = Com_list;
             Serial_port.SelectedIndex = 0;
@@ -106,6 +89,37 @@ namespace NEW_DEMO
                 Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
                 Connect_serial.Background = brush;
                 Connect_serial.Content = "连接串口";
+                Channel1.Background = brush;
+                Channel1.Content = "打开LD1";
+                Channel2.Background = brush;
+                Channel2.Content = "打开LD2";
+                Channel3.Background = brush;
+                Channel3.Content = "打开LD3";
+                Channel4.Background = brush;
+                Channel4.Content = "打开LD4";
+                LD1_setTemp.Text = "default";
+                LD2_setTemp.Text = "default";
+                LD3_setTemp.Text = "default";
+                LD4_setTemp.Text = "default";
+                LD1_setCurrent.Text = "default";
+                LD2_setCurrent.Text = "default";
+                LD3_setCurrent.Text = "default";
+                LD4_setCurrent.Text = "default";
+                LD1_setVol.Text = "default";
+                LD2_setVol.Text = "default";
+                LD3_setVol.Text = "default";
+                LD4_setVol.Text = "default";
+                set_P.Text = "default";
+                set_D.Text = "default";
+                set_I.Text = "default";
+                LD1_acTemp.Text = "default";
+                LD2_acTemp.Text = "default";    
+                LD3_acTemp.Text = "default";    
+                LD4_acTemp.Text = "default";
+                LD1_acCurrent.Text = "default";
+                LD2_acCurrent.Text = "default"; 
+                LD3_acCurrent.Text = "default";
+                LD4_acCurrent.Text = "default";
             }
             else
             {
@@ -183,7 +197,7 @@ namespace NEW_DEMO
                                         Channel_1.current = Math.Round(Current, 2);
                                         Channel_1.temperature = Temporate;
                                         Channel_1.Updata_data();
-                                        save_data_temp[point] = Temporate;
+                                        /*save_data_temp[point] = Temporate;
                                         save_data_da[point] = Current;
                                         point++;
                                         if (point == 1024)
@@ -218,7 +232,7 @@ namespace NEW_DEMO
                                             }));
                                             thread.Start();
                                             point = 0;
-                                        }
+                                        }*/
                                         break;
                                     }
                                 case 2:
@@ -294,79 +308,109 @@ namespace NEW_DEMO
 
         private void Channel_1_Click(object sender, RoutedEventArgs e)
         {
-            if (Channel_1.is_open) { 
-                Channel_1.is_open = false;
-                Close_Channel(1);
-                Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
-                Channel1.Background = brush;
-                Channel1.Content = "打开LD1";
+            if (myFPGA.Com.IsOpen)
+            {
+                if (Channel_1.is_open)
+                {
+                    Channel_1.is_open = false;
+                    Close_Channel(1);
+                    Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
+                    Channel1.Background = brush;
+                    Channel1.Content = "打开LD1";
+                }
+                else
+                {
+                    Channel_1.is_open = true;
+                    Open_Channel(1);
+                    Brush brush = new SolidColorBrush(Color.FromRgb(143, 162, 119));
+                    Channel1.Background = brush;
+                    Channel1.Content = "关闭LD1";
+                }
             }
-            else{
-                Channel_1.is_open = true;
-                Open_Channel(1);
-                Brush brush = new SolidColorBrush(Color.FromRgb(143, 162, 119));
-                Channel1.Background = brush;
-                Channel1.Content = "关闭LD1";
+            else
+            {
+                MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
             }
         }
 
         private void Channel2_Click(object sender, RoutedEventArgs e)
         {
-            if (Channel_2.is_open)
+            if (myFPGA.Com.IsOpen)
             {
-                Channel_2.is_open = false;
-                Close_Channel(2);
-                Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
-                Channel2.Background = brush;
-                Channel2.Content = "打开LD2";
+                if (Channel_2.is_open)
+                {
+                    Channel_2.is_open = false;
+                    Close_Channel(2);
+                    Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
+                    Channel2.Background = brush;
+                    Channel2.Content = "打开LD2";
+                }
+                else
+                {
+                    Channel_2.is_open = true;
+                    Open_Channel(2);
+                    Brush brush = new SolidColorBrush(Color.FromRgb(143, 162, 119));
+                    Channel2.Background = brush;
+                    Channel2.Content = "关闭LD2";
+                }
             }
             else
             {
-                Channel_2.is_open = true;
-                Open_Channel(2);
-                Brush brush = new SolidColorBrush(Color.FromRgb(143, 162, 119));
-                Channel2.Background = brush;
-                Channel2.Content = "关闭LD2";
+                MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
             }
         }
 
         private void Channel3_Click(object sender, RoutedEventArgs e)
         {
-            if (Channel_3.is_open)
+            if (myFPGA.Com.IsOpen)
             {
-                Channel_3.is_open = false;
-                Close_Channel(3);
-                Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
-                Channel3.Background = brush;
-                Channel3.Content = "打开LD3";
+                if (Channel_3.is_open)
+                {
+                    Channel_3.is_open = false;
+                    Close_Channel(3);
+                    Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
+                    Channel3.Background = brush;
+                    Channel3.Content = "打开LD3";
+                }
+                else
+                {
+                    Channel_3.is_open = true;
+                    Open_Channel(3);
+                    Brush brush = new SolidColorBrush(Color.FromRgb(143, 162, 119));
+                    Channel3.Background = brush;
+                    Channel3.Content = "关闭LD3";
+                }
             }
             else
             {
-                Channel_3.is_open = true;
-                Open_Channel(3);
-                Brush brush = new SolidColorBrush(Color.FromRgb(143, 162, 119));
-                Channel3.Background = brush;
-                Channel3.Content = "关闭LD3";
+                MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
             }
         }
 
         private void Channel4_Click(object sender, RoutedEventArgs e)
         {
-            if (Channel_4.is_open)
+            if (myFPGA.Com.IsOpen)
             {
-                Channel_4.is_open = false;
-                Close_Channel(4);
-                Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
-                Channel4.Background = brush;
-                Channel4.Content = "打开LD4";
+                if (Channel_4.is_open)
+                {
+                    Channel_4.is_open = false;
+                    Close_Channel(4);
+                    Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
+                    Channel4.Background = brush;
+                    Channel4.Content = "打开LD4";
+                }
+                else
+                {
+                    Channel_4.is_open = true;
+                    Open_Channel(4);
+                    Brush brush = new SolidColorBrush(Color.FromRgb(143, 162, 119));
+                    Channel4.Background = brush;
+                    Channel4.Content = "关闭LD4";
+                }
             }
             else
             {
-                Channel_4.is_open = true;
-                Open_Channel(4);
-                Brush brush = new SolidColorBrush(Color.FromRgb(143, 162, 119));
-                Channel4.Background = brush;
-                Channel4.Content = "关闭LD4";
+                MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
             }
         }
         private void Open_Channel(int channel)
@@ -407,13 +451,26 @@ namespace NEW_DEMO
             {
                 if (myFPGA.Com.IsOpen)
                 {
-                    int code = (int)(float.Parse(LD1_setTemp.Text) * 256);
-                    Byte High = (Byte)((code>>8)&0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x01, 0x01, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    float temp = float.Parse(LD1_setTemp.Text);
+                    if (temp < TEMP_MIN || temp > TEMP_MAX)
+                    {
+                        MessageBox.Show("温度设置超出范围", "警告", MessageBoxButton.OK);
+                        LD1_setTemp.Text = "default";
+                    }
+                    else 
+                    {
+                        int code = (int)(temp * 256);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x01, 0x01, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
                 }
-                LD1_setTemp.Focus();
+                else 
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD1_setTemp.Text = "default";
+                }
             }
         }
 
@@ -423,11 +480,25 @@ namespace NEW_DEMO
             {
                 if (myFPGA.Com.IsOpen)
                 {
-                    int code = (int)(float.Parse(LD2_setTemp.Text) * 256);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x01, 0x02, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    float temp = float.Parse(LD2_setTemp.Text);
+                    if (temp < TEMP_MIN || temp > TEMP_MAX)
+                    {
+                        MessageBox.Show("温度设置超出范围", "警告", MessageBoxButton.OK);
+                        LD2_setTemp.Text = "default";
+                    }
+                    else 
+                    {
+                        int code = (int)(temp * 256);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x01, 0x02, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);                   
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD2_setTemp.Text = "default";
                 }
             }
         }
@@ -438,11 +509,25 @@ namespace NEW_DEMO
             {
                 if (myFPGA.Com.IsOpen)
                 {
-                    int code = (int)(float.Parse(LD3_setTemp.Text) * 256);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x01, 0x03, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    float temp = float.Parse(LD3_setTemp.Text);
+                    if (temp < TEMP_MIN || temp > TEMP_MAX)
+                    {
+                        MessageBox.Show("温度设置超出范围", "警告", MessageBoxButton.OK);
+                        LD3_setTemp.Text = "default";
+                    }
+                    else 
+                    {
+                        int code = (int)(temp * 256);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x01, 0x03, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD3_setTemp.Text = "default";
                 }
             }
         }
@@ -453,11 +538,25 @@ namespace NEW_DEMO
             {
                 if (myFPGA.Com.IsOpen)
                 {
-                    int code = (int)(float.Parse(LD4_setTemp.Text) * 256);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x01, 0x04, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    float temp = float.Parse(LD4_setTemp.Text);
+                    if (temp < TEMP_MIN || temp > TEMP_MAX)
+                    {
+                        MessageBox.Show("温度设置超出范围", "警告", MessageBoxButton.OK);
+                        LD4_setTemp.Text = "default";
+                    }
+                    else
+                    {
+                        int code = (int)(temp * 256);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x01, 0x04, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD4_setTemp.Text = "default";
                 }
             }
         }
@@ -469,11 +568,24 @@ namespace NEW_DEMO
                 if (myFPGA.Com.IsOpen)
                 {
                     float current = float.Parse(LD1_setCurrent.Text);
-                    int code = (int)((current*current*0.0004 + current * 11.3509) * 65535 / 2500);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x03, 0x01, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    if (current < CURRENT_MIN || current > CURRENT_MAX)
+                    {
+                        MessageBox.Show("电流设置超出范围", "警告", MessageBoxButton.OK);
+                        LD1_setCurrent.Text = "default";
+                    }
+                    else
+                    {
+                        int code = (int)((current * current * 0.0004 + current * 11.3509) * 65535 / 2500);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x03, 0x01, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD1_setCurrent.Text = "default";
                 }
             }
         }
@@ -485,11 +597,24 @@ namespace NEW_DEMO
                 if (myFPGA.Com.IsOpen)
                 {
                     float current = float.Parse(LD2_setCurrent.Text);
-                    int code = (int)((current * current * 0.00036 + current * 11.3952 - 8.2736) * 65535 / 2500);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x03, 0x02, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    if (current < CURRENT_MIN || current > CURRENT_MAX)
+                    {
+                        MessageBox.Show("电流设置超出范围", "警告", MessageBoxButton.OK);
+                        LD2_setCurrent.Text = "default";
+                    }
+                    else
+                    {
+                        int code = (int)((current * current * 0.00036 + current * 11.3952 - 8.2736) * 65535 / 2500);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x03, 0x02, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD2_setCurrent.Text = "default";
                 }
             }
         }
@@ -501,11 +626,24 @@ namespace NEW_DEMO
                 if (myFPGA.Com.IsOpen)
                 {
                     float current = float.Parse(LD3_setCurrent.Text);
-                    int code = (int)((current * current * 0.00035 + current * 11.3655 - 0.5453) * 65535 / 2500);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x03, 0x03, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    if (current < CURRENT_MIN || current > CURRENT_MAX)
+                    {
+                        MessageBox.Show("电流设置超出范围", "警告", MessageBoxButton.OK);
+                        LD3_setCurrent.Text = "default";
+                    }
+                    else
+                    {
+                        int code = (int)((current * current * 0.00035 + current * 11.3655 - 0.5453) * 65535 / 2500);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x03, 0x03, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD3_setCurrent.Text = "default";
                 }
             }
         }
@@ -517,11 +655,24 @@ namespace NEW_DEMO
                 if (myFPGA.Com.IsOpen)
                 {
                     float current = float.Parse(LD4_setCurrent.Text);
-                    int code = (int)((current * current * 0.00034 + current * 11.4027 - 5.1199) * 65535 / 2500);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x03, 0x04, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    if (current < CURRENT_MIN || current > CURRENT_MAX)
+                    {
+                        MessageBox.Show("电流设置超出范围", "警告", MessageBoxButton.OK);
+                        LD4_setCurrent.Text = "default";
+                    }
+                    else
+                    {
+                        int code = (int)((current * current * 0.00034 + current * 11.4027 - 5.1199) * 65535 / 2500);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x03, 0x04, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD4_setCurrent.Text = "default";
                 }
             }
         }
@@ -538,6 +689,11 @@ namespace NEW_DEMO
                     Byte[] commend = new Byte[6] { 0xff, 0x05, 0x00, High, Low, 0xaa };
                     myFPGA.Com.Write(commend, 0, 6);
                 }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    set_P.Text = "default";
+                }
             }
         }
 
@@ -552,6 +708,11 @@ namespace NEW_DEMO
                     Byte Low = (Byte)(code & 0xff);
                     Byte[] commend = new Byte[6] { 0xff, 0x05, 0x01, High, Low, 0xaa };
                     myFPGA.Com.Write(commend, 0, 6);
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    set_I.Text = "default";
                 }
             }
         }
@@ -568,6 +729,11 @@ namespace NEW_DEMO
                     Byte[] commend = new Byte[6] { 0xff, 0x05, 0x02, High, Low, 0xaa };
                     myFPGA.Com.Write(commend, 0, 6);
                 }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    set_D.Text = "default";
+                }
             }
         }
 
@@ -578,13 +744,26 @@ namespace NEW_DEMO
                 if (myFPGA.Com.IsOpen)
                 {
                     double vol = double.Parse(LD1_setVol.Text);
-                    vol = ((vol * -18.0) / 47);
-                    vol = 0.00008 * vol * vol + 1.0016 * vol + 0.0071;
-                    int code = (int)(vol * 65535 / 2.5);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x02, 0x01, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    if (vol < VOL_MIN || vol > VOL_MAX)
+                    {
+                        MessageBox.Show("电压不为负值或超过-6.5V", "警告", MessageBoxButton.OK);
+                        LD1_setVol.Text = "default";
+                    }
+                    else
+                    {
+                        vol = ((vol * -18.0) / 47);
+                        vol = 0.00008 * vol * vol + 1.0016 * vol + 0.0071;
+                        int code = (int)(vol * 65535 / 2.5);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x02, 0x01, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD1_setVol.Text = "default";
                 }
             }
         }
@@ -596,13 +775,26 @@ namespace NEW_DEMO
                 if (myFPGA.Com.IsOpen)
                 {
                     double vol = double.Parse(LD2_setVol.Text);
-                    vol = ((vol * -18.0) / 47);
-                    vol = 1.0060 * vol + 0.0043;
-                    int code = (int)(vol * 65535 / 2.5);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x02, 0x02, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    if (vol < VOL_MIN || vol > VOL_MAX)
+                    {
+                        MessageBox.Show("电压不为负值或超过-6.5V", "警告", MessageBoxButton.OK);
+                        LD2_setVol.Text = "default";
+                    }
+                    else
+                    {
+                        vol = ((vol * -18.0) / 47);
+                        vol = 1.0060 * vol + 0.0043;
+                        int code = (int)(vol * 65535 / 2.5);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x02, 0x02, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD2_setVol.Text = "default";
                 }
             }
         }
@@ -614,13 +806,26 @@ namespace NEW_DEMO
                 if (myFPGA.Com.IsOpen)
                 {
                     double vol = double.Parse(LD3_setVol.Text);
-                    vol = ((vol * -18.0) / 47);
-                    vol = 0.00008 * vol * vol + 0.9977 * vol + 0.0065;
-                    int code = (int)(vol * 65535 / 2.5);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x02, 0x03, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    if (vol < VOL_MIN || vol > VOL_MAX)
+                    {
+                        MessageBox.Show("电压不为负值或超过-6.5V", "警告", MessageBoxButton.OK);
+                        LD3_setVol.Text = "default";
+                    }
+                    else
+                    {
+                        vol = ((vol * -18.0) / 47);
+                        vol = 0.00008 * vol * vol + 0.9977 * vol + 0.0065;
+                        int code = (int)(vol * 65535 / 2.5);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x02, 0x03, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD3_setVol.Text = "default";
                 }
             }
         }
@@ -632,14 +837,73 @@ namespace NEW_DEMO
                 if (myFPGA.Com.IsOpen)
                 {
                     double vol = double.Parse(LD4_setVol.Text);
-                    vol = ((vol * -18.0) / 47);
-                    vol = 1.0014 * vol + 0.0045;
-                    int code = (int)(vol * 65535 / 2.5);
-                    Byte High = (Byte)((code >> 8) & 0xff);
-                    Byte Low = (Byte)(code & 0xff);
-                    Byte[] commend = new Byte[6] { 0xff, 0x02, 0x04, High, Low, 0xaa };
-                    myFPGA.Com.Write(commend, 0, 6);
+                    if (vol < VOL_MIN || vol > VOL_MAX)
+                    {
+                        MessageBox.Show("电压不为负值或超过-6.5V", "警告", MessageBoxButton.OK);
+                        LD4_setVol.Text = "default";
+                    }
+                    else
+                    {
+                        vol = ((vol * -18.0) / 47);
+                        vol = 1.0014 * vol + 0.0045;
+                        int code = (int)(vol * 65535 / 2.5);
+                        Byte High = (Byte)((code >> 8) & 0xff);
+                        Byte Low = (Byte)(code & 0xff);
+                        Byte[] commend = new Byte[6] { 0xff, 0x02, 0x04, High, Low, 0xaa };
+                        myFPGA.Com.Write(commend, 0, 6);
+                    }
                 }
+                else
+                {
+                    MessageBox.Show("驱动尚未连接", "警告", MessageBoxButton.OK);
+                    LD4_setVol.Text = "default";
+                }
+            }
+        }
+
+        private void Change_show_Click(object sender, RoutedEventArgs e)
+        {
+            if (show == false)
+            {
+                Main_plot.Reset();
+                Main_plot.Plot.XAxis.Label("时间Time/s");
+                Main_plot.Plot.YAxis.Label("电流Current/mA");
+                Main_plot.Plot.Title("电流波形图");
+                Main_plot.Plot.SetAxisLimitsX(0, 20);
+                Main_plot.Plot.SetAxisLimitsY(0, 20);
+                Channel_1.signalplot = Main_plot.Plot.AddScatter(Channel_1.Time, Channel_1.Current);
+                Channel_1.signalplot.MaxRenderIndex = Channel_1.MAX_SHOW_POINTS - 1;
+                Channel_2.signalplot = Main_plot.Plot.AddScatter(Channel_2.Time, Channel_2.Current);
+                Channel_2.signalplot.MaxRenderIndex = Channel_2.MAX_SHOW_POINTS - 1;
+                Channel_3.signalplot = Main_plot.Plot.AddScatter(Channel_3.Time, Channel_3.Current);
+                Channel_3.signalplot.MaxRenderIndex = Channel_3.MAX_SHOW_POINTS - 1;
+                Channel_4.signalplot = Main_plot.Plot.AddScatter(Channel_4.Time, Channel_4.Current);
+                Channel_4.signalplot.MaxRenderIndex = Channel_4.MAX_SHOW_POINTS - 1;
+                Brush brush = new SolidColorBrush(Color.FromRgb(143, 162, 119));
+                Change_show.Background = brush;
+                Change_show.Content = "切换温度显示";
+                show = true;
+            }
+            else
+            {
+                Main_plot.Reset();
+                Main_plot.Plot.XAxis.Label("时间Time/s");
+                Main_plot.Plot.YAxis.Label("温度Temp/°");
+                Main_plot.Plot.Title("温度波形图");
+                Main_plot.Plot.SetAxisLimitsX(0, 20);
+                Main_plot.Plot.SetAxisLimitsY(0, 20);
+                Channel_1.signalplot = Main_plot.Plot.AddScatter(Channel_1.Time, Channel_1.Temperature);
+                Channel_1.signalplot.MaxRenderIndex = Channel_1.MAX_SHOW_POINTS - 1;
+                Channel_2.signalplot = Main_plot.Plot.AddScatter(Channel_2.Time, Channel_2.Temperature);
+                Channel_2.signalplot.MaxRenderIndex = Channel_2.MAX_SHOW_POINTS - 1;
+                Channel_3.signalplot = Main_plot.Plot.AddScatter(Channel_3.Time, Channel_3.Temperature);
+                Channel_3.signalplot.MaxRenderIndex = Channel_3.MAX_SHOW_POINTS - 1;
+                Channel_4.signalplot = Main_plot.Plot.AddScatter(Channel_4.Time, Channel_4.Temperature);
+                Channel_4.signalplot.MaxRenderIndex = Channel_4.MAX_SHOW_POINTS - 1;
+                Brush brush = new SolidColorBrush(Color.FromRgb(211, 211, 211));
+                Change_show.Background = brush;
+                Change_show.Content = "切换电流显示";
+                show = false;
             }
         }
     }

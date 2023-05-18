@@ -152,6 +152,9 @@
                             <TextBox x:Name="set_I" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" Foreground="Gray" Width="65" KeyDown="set_I_KeyDown"/>
                             <TextBox x:Name="set_D" Text="default" FontSize="18" FontFamily="Times New Roman" Margin="10,10,0,0" VerticalAlignment="Center" Foreground="Gray" Width="65" KeyDown="set_D_KeyDown"/>
                         </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="Change_show" Content="切换电流显示" Width="150" Height="35" Margin="1,5,5,5" FontSize="18" FontFamily="宋体" Background="#D3D3D3" Click="Change_show_Click" />
+                        </StackPanel>
                     </StackPanel>
 
                 </Grid>
